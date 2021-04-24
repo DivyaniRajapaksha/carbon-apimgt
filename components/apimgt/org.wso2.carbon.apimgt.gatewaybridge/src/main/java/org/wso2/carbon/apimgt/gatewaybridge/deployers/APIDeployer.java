@@ -1,6 +1,6 @@
 package org.wso2.carbon.apimgt.gatewaybridge.deployers;
 
-import org.wso2.carbon.apimgt.gatewaybridge.dto.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 
 /**
  * Class for deploying apis.

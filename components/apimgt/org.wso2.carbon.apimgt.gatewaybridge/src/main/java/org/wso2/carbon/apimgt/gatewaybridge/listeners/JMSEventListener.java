@@ -5,11 +5,12 @@ import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import org.wso2.carbon.apimgt.gatewaybridge.apiretriever.ArtifactRetriever;
-import org.wso2.carbon.apimgt.gatewaybridge.apiretriever.DBRetriever;
-import org.wso2.carbon.apimgt.gatewaybridge.constants.APIConstants;
-import org.wso2.carbon.apimgt.gatewaybridge.dto.GatewayAPIDTO;
-import org.wso2.carbon.apimgt.gatewaybridge.models.DeployAPIInGatewayEvent;
+
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.impl.APIConstants;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
+import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 
 import java.io.UnsupportedEncodingException;
 import java.util.Enumeration;
@@ -70,7 +71,7 @@ public class JMSEventListener implements MessageListener {
                     String key = (String) enumeration.nextElement();
                     map.put(key, mapMessage.getObject(key));
                 }
-                byte[] eventDecoded = Base64.decodeBase64((String) map.get(APIConstants.EVENT));
+                byte[] eventDecoded = Base64.decodeBase64((String) map.get(APIConstants.EVENT_PAYLOAD));
                 DeployAPIInGatewayEvent gatewayEvent = new Gson().
                         fromJson(new String(eventDecoded , "UTF8") , DeployAPIInGatewayEvent.class);
 
@@ -82,8 +83,8 @@ public class JMSEventListener implements MessageListener {
                     log.debug("GatewayLabels" + gatewayEvent.getGatewayLabels());
 
                     String gatewayLabel = gatewayEvent.getGatewayLabels().iterator().next();
-                    String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(gatewayEvent.
-                            getApiId(), gatewayLabel, APIConstants.GATEWAY_INSTRUCTION_PUBLISH);
+                    String gatewayRuntimeArtifact = artifactRetriever.retrieveArtifact(Integer.toString(gatewayEvent.
+                            getApiId()), gatewayLabel);
                     if (StringUtils.isNotEmpty(gatewayRuntimeArtifact)) {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         log.debug("GatewayAPIDTO    :" + gatewayAPIDTO);
@@ -126,7 +127,7 @@ public class JMSEventListener implements MessageListener {
         connection.start();
 
         Session session = connection.createSession(false, Session.AUTO_ACKNOWLEDGE);
-        Topic topicLabel = (Topic) context.lookup("notification");
+        Topic topicLabel = (Topic) context.lookup(APIConstants.TopicNames.TOPIC_NOTIFICATION);
 
         MessageConsumer subscriber1 = ((TopicSession) session).createSubscriber(topicLabel);
 

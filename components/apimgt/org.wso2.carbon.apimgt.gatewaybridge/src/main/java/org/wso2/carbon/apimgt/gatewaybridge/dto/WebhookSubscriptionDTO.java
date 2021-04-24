@@ -1,20 +1,26 @@
-package org.wso2.carbon.apimgt.gatewaybridge.models;
+package org.wso2.carbon.apimgt.gatewaybridge.dto;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
  * Class for representing the webhook subscription.
  */
-public class WebhookSubscription implements Serializable {
+public class WebhookSubscriptionDTO implements Serializable {
 
+    private static final long serialVersionUID = 1L;
     private String subscriberName;
     private String callback;
     private String topic;
-    private Date updatedTime;
+    private long updatedTime;
     private long expiryTime;
 
-    public WebhookSubscription(String subscriberName, String callback, String topic, long expiryTime) {
+    public WebhookSubscriptionDTO(String subscriberName, String callback, String topic) {
+        this.subscriberName = subscriberName;
+        this.callback = callback;
+        this.topic = topic;
+    }
+
+    public WebhookSubscriptionDTO(String subscriberName, String callback, String topic, long expiryTime) {
         this.subscriberName = subscriberName;
         this.callback = callback;
         this.topic = topic;
@@ -45,12 +51,12 @@ public class WebhookSubscription implements Serializable {
         this.topic = topic;
     }
 
-    public Date getUpdatedTime() {
-        return updatedTime != null ? new Date(updatedTime.getTime()) : null;
+    public long getUpdatedTime() {
+        return updatedTime;
     }
 
-    public void setUpdatedTime(Date updatedTime) {
-        this.updatedTime = updatedTime != null ? new Date(updatedTime.getTime()) : null;
+    public void setUpdatedTime(long updatedTime) {
+        this.updatedTime = updatedTime;
     }
 
     public long getExpiryTime() {
