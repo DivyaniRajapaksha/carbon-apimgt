@@ -14,10 +14,10 @@
     <packaging>bundle</packaging>
 
 
-    <properties>
-        <maven.compiler.source>11</maven.compiler.source>
-        <maven.compiler.target>11</maven.compiler.target>
-    </properties>
+<!--    <properties>-->
+<!--        <maven.compiler.source>11</maven.compiler.source>-->
+<!--        <maven.compiler.target>11</maven.compiler.target>-->
+<!--    </properties>-->
 
     <dependencies>
         <dependency>
@@ -93,7 +93,7 @@
                         <Private-Package>
                         </Private-Package>
                         <Export-Package>
-                            org.wso2.carbon.apimgt.common.gateway.*;version="${carbon.apimgt.version}",
+                            org.wso2.carbon.apimgt.gatewaybridge.*;
                         </Export-Package>
                         <Import-Package>
                             com.google.gson.annotations.*,
