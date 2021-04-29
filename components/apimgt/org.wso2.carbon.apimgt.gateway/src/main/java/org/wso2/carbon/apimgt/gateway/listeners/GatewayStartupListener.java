@@ -31,6 +31,7 @@ import org.wso2.carbon.apimgt.gateway.jwt.RevokedJWTTokensRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.BlockingConditionRetriever;
 import org.wso2.carbon.apimgt.gateway.throttling.util.KeyTemplateRetriever;
 import org.wso2.carbon.apimgt.gateway.webhooks.WebhooksDataHolder;
+import org.wso2.carbon.apimgt.gatewaybridge.listeners.JMSEventListener;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.certificatemgt.exceptions.CertificateManagementException;
 import org.wso2.carbon.apimgt.impl.certificatemgt.reloader.CertificateReLoaderUtil;
@@ -68,6 +69,7 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
     private JMSTransportHandler jmsTransportHandlerForEventHub;
     private ThrottleProperties throttleProperties;
     private GatewayArtifactSynchronizerProperties gatewayArtifactSynchronizerProperties;
+    private JMSEventListener jmsEventListener;
     private boolean isAPIsDeployedInSyncMode = false;
     private int syncModeDeploymentCount = 0;
     private int retryCount = 10;
@@ -92,6 +94,8 @@ public class GatewayStartupListener extends AbstractAxis2ConfigurationContextObs
         EventHubConfigurationDto.EventHubReceiverConfiguration eventHubReceiverConfiguration =
                 ServiceReferenceHolder.getInstance().getAPIManagerConfiguration().getEventHubConfigurationDto()
                         .getEventHubReceiverConfiguration();
+        this.jmsEventListener =
+                new JMSEventListener();
         if (eventHubReceiverConfiguration != null) {
             this.jmsTransportHandlerForEventHub =
                     new JMSTransportHandler(eventHubReceiverConfiguration.getJmsConnectionParameters());

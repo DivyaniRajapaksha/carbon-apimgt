@@ -3287,11 +3287,14 @@ public class SQLConstants {
                 "SELECT WH_SUBSCRIPTION_ID FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_SUBSCRIBER_NAME = ? AND " +
                         "WH_CALLBACK_URL = ? AND  WH_TOPIC = ?";
         public static final String ADD_SUBSCRIPTION =
-                "INSERT INTO GB_WEBHOOKS_SUBSCRIPTION (WH_SUBSCRIBER_NAME, WH_CALLBACK_URL, WH_TOPIC, " +
-                        "UPDATED_AT, EXPIRY_AT, " +
-                        "DELIVERED_AT, DELIVERY_STATE) VALUES (?,?,?,?,?,?,?)";
+              "INSERT INTO GB_WEBHOOKS_SUBSCRIPTION (WH_SUBSCRIBER_NAME, WH_CALLBACK_URL, WH_TOPIC," +
+                      "UPDATED_AT, EXPIRY_AT ) VALUES (?,?,?,?,?)";
+        public static final String GET_SUBSCRIPTIONS_FOR_TOPIC =
+                "SELECT WH_CALLBACK_URL, WH_SUBSCRIBER_NAME " +
+                "FROM GB_WEBHOOKS_SUBSCRIPTION WHERE WH_TOPIC= ? ";
         public static final String UPDATE_EXISTING_SUBSCRIPTION = "UPDATE GB_WEBHOOKS_SUBSCRIPTION SET " +
                 "WH_CALLBACK_URL = ?, WH_TOPIC = ?, UPDATED_AT = ?, EXPIRY_AT = ?  WHERE WH_SUBSCRIPTION_ID = ?";
+
     }
     public static class KeyManagerSqlConstants {
         public static final String ADD_KEY_MANAGER =

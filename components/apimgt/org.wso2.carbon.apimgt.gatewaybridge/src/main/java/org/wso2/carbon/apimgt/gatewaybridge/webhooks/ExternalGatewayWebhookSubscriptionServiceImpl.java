@@ -18,7 +18,6 @@ public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGa
     @Override
     public void addExternalGatewaySubscription(WebhookSubscriptionDTO webhookSubscriptionDTO)
             throws APIManagementException {
-       // WebhooksDAO webhooksDAO = WebhooksDAO.getInstance();
         WebhooksDAO webhooksDAO = new WebhooksDAO();
         Boolean result = webhooksDAO.addSubscription(webhookSubscriptionDTO);
         if (result) {

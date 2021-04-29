@@ -6,17 +6,25 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import org.wso2.carbon.apimgt.api.APIManagementException;
 import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
+import org.wso2.carbon.apimgt.gatewaybridge.dto.WebhookSubscriptionDTO;
+import org.wso2.carbon.apimgt.gatewaybridge.webhooks.WebhookSubscriptionGetService;
+import org.wso2.carbon.apimgt.gatewaybridge.webhooks.WebhookSubscriptionGetServiceImpl;
 import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.ArtifactRetriever;
 import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.DBRetriever;
+import org.wso2.carbon.apimgt.impl.gatewayartifactsynchronizer.exception.ArtifactSynchronizerException;
 import org.wso2.carbon.apimgt.impl.notifier.events.DeployAPIInGatewayEvent;
 
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+
 import javax.jms.Connection;
 import javax.jms.ConnectionFactory;
 import javax.jms.JMSException;
@@ -38,14 +46,20 @@ public class JMSEventListener implements MessageListener {
     private static final Log log = LogFactory.getLog(JMSEventListener.class);
 
     ArtifactRetriever artifactRetriever = new DBRetriever();
-
+    List<WebhookSubscriptionDTO> subscriptionsList = new ArrayList<>();
     /**
      * This constructs a JMSEventListener instance.
      */
     public JMSEventListener() {
-        if (log.isDebugEnabled()) {
-            log.debug("Called JMSEventListener");
-        }
+      try {
+          if (log.isDebugEnabled()) {
+              log.debug("Called JMSEventListener");
+          }
+          this.setSubscriber();
+      } catch (NamingException | JMSException | InterruptedException e) {
+          log.debug("Unexpected Error: " + e);
+      }
+
     }
 
     /**
@@ -61,7 +75,7 @@ public class JMSEventListener implements MessageListener {
     public void onMessage(Message message) {
 
         log.debug("Event Received: " + message);
-
+        WebhookSubscriptionGetService webhookSubscriptionGetService;
         try {
             if (message instanceof MapMessage) {
                 MapMessage mapMessage = (MapMessage) message;
@@ -89,14 +103,15 @@ public class JMSEventListener implements MessageListener {
                         GatewayAPIDTO gatewayAPIDTO = new Gson().fromJson(gatewayRuntimeArtifact, GatewayAPIDTO.class);
                         log.debug("GatewayAPIDTO    :" + gatewayAPIDTO);
                         log.debug("GatewayAPIDTO Name       :" + gatewayAPIDTO.getName());
+                        webhookSubscriptionGetService = new WebhookSubscriptionGetServiceImpl();
+                        subscriptionsList = webhookSubscriptionGetService.gatWebhookSubscription(gatewayLabel);
                     }
 
                 }
 
             }
-        } catch (JMSException | UnsupportedEncodingException e) {
-            log.debug("Exception" + e);
-        } catch (Exception e) {
+        } catch (JMSException | UnsupportedEncodingException |
+                APIManagementException | ArtifactSynchronizerException e) {
             log.debug("Exception" + e);
         }
     }

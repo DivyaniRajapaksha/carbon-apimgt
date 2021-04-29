@@ -14,10 +14,14 @@ public class WebhookSubscriptionDTO implements Serializable {
     private long updatedTime;
     private long expiryTime;
 
+    public WebhookSubscriptionDTO() {
+    }
+
     public WebhookSubscriptionDTO(String subscriberName, String callback, String topic) {
         this.subscriberName = subscriberName;
         this.callback = callback;
         this.topic = topic;
+        this.expiryTime = 10;
     }
 
     public WebhookSubscriptionDTO(String subscriberName, String callback, String topic, long expiryTime) {

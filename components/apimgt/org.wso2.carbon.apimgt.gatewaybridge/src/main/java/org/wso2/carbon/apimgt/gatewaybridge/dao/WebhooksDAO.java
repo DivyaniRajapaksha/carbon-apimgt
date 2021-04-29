@@ -9,11 +9,14 @@ import org.wso2.carbon.apimgt.impl.APIConstants;
 import org.wso2.carbon.apimgt.impl.dao.constants.SQLConstants;
 import org.wso2.carbon.apimgt.impl.utils.APIMgtDBUtil;
 
+
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * This class represent the WebhooksSubscriptionDAO.
@@ -24,17 +27,6 @@ public class WebhooksDAO {
     private static final Log log = LogFactory.getLog(WebhooksDAO.class);
     private static WebhooksDAO subscriptionsDAO;
 
-//    /**
-//     * Method to get the instance of the WebhooksSubscriptionDAO.
-//     *
-//     * @return {@link WebhooksDAO} instance
-//     */
-//    public static WebhooksDAO getInstance() {
-//        if (subscriptionsDAO == null) {
-//            subscriptionsDAO = new WebhooksDAO();
-//        }
-//        return subscriptionsDAO;
-//    }
 
     /**
      * Manage adding Webhook Subscription to database.
@@ -103,15 +95,14 @@ public class WebhooksDAO {
      */
     private void addSubscription(Connection conn, WebhookSubscriptionDTO webhookSubscription)
             throws APIManagementException {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try (PreparedStatement prepareStmt = conn
                 .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.ADD_SUBSCRIPTION)) {
             prepareStmt.setString(1, webhookSubscription.getSubscriberName());
             prepareStmt.setString(2, webhookSubscription.getCallback());
             prepareStmt.setString(3, webhookSubscription.getTopic());
-           prepareStmt.setTimestamp(4, new Timestamp(webhookSubscription.getUpdatedTime()));
+           prepareStmt.setTimestamp(4, timestamp);
             prepareStmt.setLong(5, webhookSubscription.getExpiryTime());
-            prepareStmt.setString(6, null);
-            prepareStmt.setInt(7, 0);
             prepareStmt.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error while adding subscriptions request for callback" +
@@ -129,11 +120,12 @@ public class WebhooksDAO {
      */
     private void updateSubscription(Connection conn, WebhookSubscriptionDTO webhookSubscription, int id)
             throws APIManagementException {
+        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try (PreparedStatement prepareStmt = conn
-                .prepareStatement(SQLConstants.WebhooksSqlConstants.UPDATE_EXISTING_SUBSCRIPTION)) {
+                .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.UPDATE_EXISTING_SUBSCRIPTION)) {
             prepareStmt.setString(1, webhookSubscription.getCallback());
             prepareStmt.setString(2, webhookSubscription.getTopic());
-            prepareStmt.setTimestamp(3,  new Timestamp(webhookSubscription.getUpdatedTime()));
+            prepareStmt.setTimestamp(3, timestamp);
             prepareStmt.setLong(4, webhookSubscription.getExpiryTime());
             prepareStmt.setInt(5, id);
             prepareStmt.executeUpdate();
@@ -160,4 +152,28 @@ public class WebhooksDAO {
             log.error("Error while rolling back the transaction.", e1);
         }
     }
-}
+
+    public List<WebhookSubscriptionDTO> getSubscriptionsList(String topic) throws APIManagementException {
+        List<WebhookSubscriptionDTO> subscriptionsList = new ArrayList<>();
+        try (Connection conn = APIMgtDBUtil.getConnection()) {
+            try (PreparedStatement preparedStatement = conn
+                    .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.GET_SUBSCRIPTIONS_FOR_TOPIC)) {
+                preparedStatement.setString(1, topic);
+                try (ResultSet rs = preparedStatement.executeQuery()) {
+                    WebhookSubscriptionDTO webhookSubscriptionDTO = new WebhookSubscriptionDTO();
+                    webhookSubscriptionDTO.setSubscriberName(rs.getString(APIConstants.Webhooks.SUBSCRIBER_NAME));
+                    webhookSubscriptionDTO.setCallback(rs.getString(APIConstants.Webhooks.CALLBACK));
+                    subscriptionsList.add(webhookSubscriptionDTO);
+                } catch (SQLException e) {
+                    throw new APIManagementException("Error while processing webhooks subscription list", e);
+                }
+            } catch (SQLException e) {
+                throw new APIManagementException("Error while retrieving webhooks subscription list", e);
+            }
+        } catch (SQLException e) {
+            throw new APIManagementException("Error while retrieving webhooks subscription list request", e);
+        }
+        return subscriptionsList;
+    }
+
+    }
