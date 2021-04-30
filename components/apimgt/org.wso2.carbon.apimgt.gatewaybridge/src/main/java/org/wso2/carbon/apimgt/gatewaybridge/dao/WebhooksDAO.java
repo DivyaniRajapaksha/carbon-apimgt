@@ -14,7 +14,6 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,20 +29,25 @@ public class WebhooksDAO {
 
     /**
      * Manage adding Webhook Subscription to database.
+     *
      * @param webhookSubscription the DTO of webhook subscription data
      * @return a status of the operation
-     * @throws APIManagementException
      */
     public boolean addSubscription(WebhookSubscriptionDTO webhookSubscription) throws APIManagementException {
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try {
-                conn.setAutoCommit(false);
-                int id = findSubscription(conn, webhookSubscription);
-                if (id == 0) {
-                    addSubscription(conn, webhookSubscription);
-                } else {
-                    updateSubscription(conn, webhookSubscription, id);
-                }
+               if (webhookSubscription != null) {
+                   conn.setAutoCommit(false);
+                   int id = findSubscription(conn, webhookSubscription);
+                   if (id == 0) {
+                       addSubscription(conn, webhookSubscription);
+                   } else {
+                       updateSubscription(conn, webhookSubscription, id);
+                   }
+               } else {
+                   log.debug("WebhookDTO is empty!");
+               }
+
             } catch (SQLException e) {
                 handleConnectionRollBack(conn);
                 throw new APIManagementException("Error while storing webhooks unsubscription request for callback" +
@@ -58,10 +62,10 @@ public class WebhooksDAO {
 
     /**
      * Check whether the subscription is available in the database.
+     *
      * @param conn          the connection of database
-     * @param webhookSubscription
+     * @param webhookSubscription  the DTO object with values.
      * @return an integer with no of rows available
-     * @throws APIManagementException
      */
     private int findSubscription(Connection conn, WebhookSubscriptionDTO webhookSubscription)
             throws APIManagementException {
@@ -89,20 +93,18 @@ public class WebhooksDAO {
 
     /**
      * Insert external gateway subscription to database.
-     * @param conn
-     * @param webhookSubscription
-     * @throws APIManagementException
+     *
+     * @param conn the connection for the database
+     * @param webhookSubscription  the DTO object with values.
      */
     private void addSubscription(Connection conn, WebhookSubscriptionDTO webhookSubscription)
             throws APIManagementException {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
         try (PreparedStatement prepareStmt = conn
                 .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.ADD_SUBSCRIPTION)) {
             prepareStmt.setString(1, webhookSubscription.getSubscriberName());
             prepareStmt.setString(2, webhookSubscription.getCallback());
             prepareStmt.setString(3, webhookSubscription.getTopic());
-           prepareStmt.setTimestamp(4, timestamp);
-            prepareStmt.setLong(5, webhookSubscription.getExpiryTime());
+            prepareStmt.setLong(4, webhookSubscription.getExpiryTime());
             prepareStmt.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error while adding subscriptions request for callback" +
@@ -113,21 +115,20 @@ public class WebhooksDAO {
 
     /**
      * Update the available gateway subscription.
-     * @param conn
-     * @param webhookSubscription
-     * @param id
-     * @throws APIManagementException
+     *
+     * @param conn   the connection for the database
+     * @param webhookSubscription the DTO object with values.
+     * @param id the id of the specific subscriber.
      */
     private void updateSubscription(Connection conn, WebhookSubscriptionDTO webhookSubscription, int id)
             throws APIManagementException {
-        Timestamp timestamp = new Timestamp(System.currentTimeMillis());
+
         try (PreparedStatement prepareStmt = conn
                 .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.UPDATE_EXISTING_SUBSCRIPTION)) {
             prepareStmt.setString(1, webhookSubscription.getCallback());
             prepareStmt.setString(2, webhookSubscription.getTopic());
-            prepareStmt.setTimestamp(3, timestamp);
-            prepareStmt.setLong(4, webhookSubscription.getExpiryTime());
-            prepareStmt.setInt(5, id);
+            prepareStmt.setLong(3, webhookSubscription.getExpiryTime());
+            prepareStmt.setInt(4, id);
             prepareStmt.executeUpdate();
         } catch (SQLException e) {
             throw new APIManagementException("Error while deleting existing subscriptions request for callback" +
@@ -153,17 +154,25 @@ public class WebhooksDAO {
         }
     }
 
+    /**
+     * Retrieving the List of subscribers to a topic.
+     *
+     * @param topic the topic subscribed
+     * @return a list of subscriber DTOs.
+     */
     public List<WebhookSubscriptionDTO> getSubscriptionsList(String topic) throws APIManagementException {
         List<WebhookSubscriptionDTO> subscriptionsList = new ArrayList<>();
+        WebhookSubscriptionDTO webhookSubscriptionDTO = new WebhookSubscriptionDTO();
         try (Connection conn = APIMgtDBUtil.getConnection()) {
             try (PreparedStatement preparedStatement = conn
                     .prepareStatement(SQLConstants.ExternalGatewayWebhooksSqlConstants.GET_SUBSCRIPTIONS_FOR_TOPIC)) {
                 preparedStatement.setString(1, topic);
                 try (ResultSet rs = preparedStatement.executeQuery()) {
-                    WebhookSubscriptionDTO webhookSubscriptionDTO = new WebhookSubscriptionDTO();
-                    webhookSubscriptionDTO.setSubscriberName(rs.getString(APIConstants.Webhooks.SUBSCRIBER_NAME));
-                    webhookSubscriptionDTO.setCallback(rs.getString(APIConstants.Webhooks.CALLBACK));
-                    subscriptionsList.add(webhookSubscriptionDTO);
+                    if (rs.next()) {
+                        webhookSubscriptionDTO.setSubscriberName(rs.getString("WH_SUBSCRIBER_NAME"));
+                        webhookSubscriptionDTO.setCallback(rs.getString("WH_CALLBACK_URL"));
+                        subscriptionsList.add(webhookSubscriptionDTO);
+                    }
                 } catch (SQLException e) {
                     throw new APIManagementException("Error while processing webhooks subscription list", e);
                 }

@@ -4,7 +4,10 @@ package org.wso2.carbon.apimgt.gatewaybridge.webhooks;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.apimgt.api.APIManagementException;
+import org.wso2.carbon.apimgt.api.gateway.GatewayAPIDTO;
 import org.wso2.carbon.apimgt.gatewaybridge.dao.WebhooksDAO;
+import org.wso2.carbon.apimgt.gatewaybridge.deployers.APIDeployer;
+import org.wso2.carbon.apimgt.gatewaybridge.deployers.APIDeployerImpl;
 import org.wso2.carbon.apimgt.gatewaybridge.dto.WebhookSubscriptionDTO;
 
 
@@ -14,17 +17,33 @@ import org.wso2.carbon.apimgt.gatewaybridge.dto.WebhookSubscriptionDTO;
  */
 public class ExternalGatewayWebhookSubscriptionServiceImpl implements ExternalGatewayWebhookSubscriptionService {
     private static final Log log = LogFactory.getLog(ExternalGatewayWebhookSubscriptionServiceImpl.class);
-
+    private static  WebhookSubscriptionGetService webhookSubscriptionGetService =
+            new WebhookSubscriptionGetServiceImpl();
+    private static WebhooksDAO webhooksDAO = new WebhooksDAO();
     @Override
     public void addExternalGatewaySubscription(WebhookSubscriptionDTO webhookSubscriptionDTO)
             throws APIManagementException {
-        WebhooksDAO webhooksDAO = new WebhooksDAO();
         Boolean result = webhooksDAO.addSubscription(webhookSubscriptionDTO);
+        webhookSubscriptionGetService.getWebhookSubscription("publish");
         if (result) {
             log.debug("Successfully inserted the subscription ");
         } else {
             log.debug("Unexpected error while inserting the subscription ");
         }
+
+        //Test Webhooks
+        GatewayAPIDTO gatewayAPIDTO = new GatewayAPIDTO();
+        gatewayAPIDTO.setName("test1");
+        gatewayAPIDTO.setVersion("1.0.0");
+        gatewayAPIDTO.setProvider("ABC");
+        gatewayAPIDTO.setApiId("1234");
+        try {
+            APIDeployer apiDeployer = new APIDeployerImpl();
+            apiDeployer.deployArtifacts(gatewayAPIDTO, "publish");
+        } catch (Exception e) {
+            log.debug("Unexpected Error:" + e);
+        }
+
 
     }
 }

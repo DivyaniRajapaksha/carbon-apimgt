@@ -104,7 +104,7 @@ public class JMSEventListener implements MessageListener {
                         log.debug("GatewayAPIDTO    :" + gatewayAPIDTO);
                         log.debug("GatewayAPIDTO Name       :" + gatewayAPIDTO.getName());
                         webhookSubscriptionGetService = new WebhookSubscriptionGetServiceImpl();
-                        subscriptionsList = webhookSubscriptionGetService.gatWebhookSubscription(gatewayLabel);
+                        subscriptionsList = webhookSubscriptionGetService.getWebhookSubscription(gatewayLabel);
                     }
 
                 }

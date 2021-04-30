@@ -9,6 +9,6 @@ import java.util.List;
  * Get the subscriptions for the topic from database.
  */
 public interface WebhookSubscriptionGetService {
-    public List<WebhookSubscriptionDTO> gatWebhookSubscription(String topic)
+    public List<WebhookSubscriptionDTO> getWebhookSubscription(String topic)
             throws APIManagementException;
 }

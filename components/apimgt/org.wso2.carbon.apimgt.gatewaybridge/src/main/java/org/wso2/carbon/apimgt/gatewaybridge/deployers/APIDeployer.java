@@ -12,7 +12,7 @@ public interface APIDeployer {
      * @param gatewayAPIDTO     the API DTO contains API details
      * @throws Exception
      */
-    public void deployArtifacts(GatewayAPIDTO gatewayAPIDTO)
+    public void deployArtifacts(GatewayAPIDTO gatewayAPIDTO , String topic)
             throws Exception;
 
     public void unDeployArtifacts(String artifactName)

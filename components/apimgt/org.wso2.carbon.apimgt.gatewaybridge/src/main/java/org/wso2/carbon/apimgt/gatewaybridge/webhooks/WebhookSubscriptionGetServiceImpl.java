@@ -11,7 +11,7 @@ import java.util.List;
 public class WebhookSubscriptionGetServiceImpl implements WebhookSubscriptionGetService {
 
     @Override
-    public List<WebhookSubscriptionDTO> gatWebhookSubscription(String topic) throws APIManagementException {
+    public List<WebhookSubscriptionDTO> getWebhookSubscription(String topic) throws APIManagementException {
         WebhooksDAO webhooksDAO = new WebhooksDAO();
         return webhooksDAO.getSubscriptionsList(topic);
     }
