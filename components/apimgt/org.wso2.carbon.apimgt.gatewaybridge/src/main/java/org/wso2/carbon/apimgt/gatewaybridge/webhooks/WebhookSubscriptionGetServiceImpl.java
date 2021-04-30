@@ -10,6 +10,12 @@ import java.util.List;
  */
 public class WebhookSubscriptionGetServiceImpl implements WebhookSubscriptionGetService {
 
+    /**
+     *Invoke the services to retrieve
+     * subscription list.
+     * @param topic the subscribed topic.
+     * @return a list of webhook subscription.
+     */
     @Override
     public List<WebhookSubscriptionDTO> getWebhookSubscription(String topic) throws APIManagementException {
         WebhooksDAO webhooksDAO = new WebhooksDAO();

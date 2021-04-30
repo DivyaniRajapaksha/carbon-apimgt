@@ -15,7 +15,8 @@ import org.wso2.carbon.apimgt.internal.service.dto.EventSubscriptionDTO;
 import javax.ws.rs.core.Response;
 
 /**
- * web service.
+ * Http REST web Service for external
+ * gateway subscription.
  */
 public class GatewaybridgeSubscriptionApiServiceImpl implements GatewaybridgeSubscriptionApiService {
 
@@ -25,18 +26,20 @@ public class GatewaybridgeSubscriptionApiServiceImpl implements GatewaybridgeSub
 
 
     @Override
-    public Response gatewaybridgeSubscriptionPost(EventSubscriptionDTO subscription, MessageContext messageContext)
-            throws APIManagementException {
+    public Response gatewaybridgeSubscriptionPost(EventSubscriptionDTO subscription, MessageContext messageContext) {
         try {
             externalGatewayWebhookSubscription.addExternalGatewaySubscription(
                     new WebhookSubscriptionDTO(subscription.getSubscriberName(),
                             subscription.getCallbackUrl(), subscription.getTopic()));
+
             return Response.ok().build();
         } catch (APIManagementException e) {
+
             log.error("Error while processing request", e);
             JSONObject responseObj = new JSONObject();
             responseObj.put("Message", e.getMessage());
             String responseStringObj = String.valueOf(responseObj);
+
             return Response.serverError().entity(responseStringObj).build();
         }
     }

@@ -8,6 +8,12 @@ import org.wso2.carbon.apimgt.gatewaybridge.dto.WebhookSubscriptionDTO;
  * Subscribe the external gateway to receive events.
  */
 public interface ExternalGatewayWebhookSubscriptionService {
-    public void addExternalGatewaySubscription(WebhookSubscriptionDTO webhookSubscriptionDTO)
+
+    /**
+     * Invoke the services needed to
+     * store gateway subscriptions in the database.
+     * @param webhookSubscriptionDTO the DTO object contains the subscription details
+     */
+     void addExternalGatewaySubscription(WebhookSubscriptionDTO webhookSubscriptionDTO)
             throws APIManagementException;
 }

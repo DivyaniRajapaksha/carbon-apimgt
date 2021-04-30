@@ -18,7 +18,7 @@ public class HttpUtil {
 
     /**
      * Returns a CloseableHttpClient instance
-     * This method always returns immediately, whether or not the
+     * Always returns immediately, whether or not the
      * CloseableHttpClient exists.
      * @return an executable CloseableHttpClient
      */

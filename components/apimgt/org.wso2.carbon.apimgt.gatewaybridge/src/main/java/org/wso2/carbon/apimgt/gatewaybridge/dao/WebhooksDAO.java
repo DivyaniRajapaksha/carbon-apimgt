@@ -24,7 +24,7 @@ import java.util.List;
 public class WebhooksDAO {
 
     private static final Log log = LogFactory.getLog(WebhooksDAO.class);
-    private static WebhooksDAO subscriptionsDAO;
+
 
 
     /**
